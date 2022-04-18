@@ -1,20 +1,20 @@
-using System.Collections;
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using mniaAPI.Data;
 using mniaAPI.Models;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace mniaAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    public class CategoryController : ControllerBase
+    [Authorize]
+    public class CategoriesController : ControllerBase
     {
         private readonly ApplicationDbContext database;
-        public CategoryController(ApplicationDbContext database)
+        public CategoriesController(ApplicationDbContext database)
         {
             this.database = database;
         }
@@ -24,31 +24,30 @@ namespace mniaAPI.Controllers
         {
             try
             {
-                var category = database.Categorys.ToList();
-                if (category == null) return NoContent();
+                var categories = database.Categories.ToList();
+                if (categories == null) return NoContent();
 
-                return Ok(category);
+                return Ok(categories);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
                    $"Erro ao tentar encontrar categorias. Erro: {ex.Message}");
             }
 
         }
-
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
             try
             {
-                var categoria = database.Categorys.First(c => c.Id == id);
+                var categories = database.Categories.First(c => c.Id == id);
 
-                if (categoria == null) return NoContent();
+                if (categories == null) return NoContent();
 
-                if (categoria.Id > 0)
+                if (categories.Id > 0)
                 {
-                    return Ok(categoria);
+                    return Ok(categories);
                 }
             }
             catch (Exception ex)
@@ -62,16 +61,17 @@ namespace mniaAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] CategoryDTO CategoryTemp)
+        [Authorize(Roles = "Admin")]
+        public IActionResult Post([FromBody] CategoriesDTO model)
         {
             try
             {
-                Category category = new Category();
+                Categories categories = new Categories();
 
-                category.Name = CategoryTemp.Name;
-                category.Technology = CategoryTemp.Technology;
+                categories.Name = model.Name;
+                categories.Technology = model.Technology;
 
-                database.Add(category);
+                database.Add(categories);
                 database.SaveChanges();
 
                 return Ok(new { msg = "Categoria criada com sucesso." });
@@ -87,14 +87,15 @@ namespace mniaAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] CategoryDTO CategoryTemp)
+        [Authorize(Roles = "Admin")]
+        public IActionResult Put(int id, [FromBody] CategoriesDTO model)
         {
             try
             {
-                var category = database.Categorys.First(c => c.Id == id);
+                var category = database.Categories.First(c => c.Id == id);
 
-                category.Name = CategoryTemp.Name;
-                category.Technology = CategoryTemp.Technology;
+                category.Name = model.Name;
+                category.Technology = model.Technology;
 
                 database.Update(category);
                 database.SaveChanges();
@@ -110,17 +111,18 @@ namespace mniaAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(int id)
         {
             try
             {
-                var categoria = database.Categorys.First(c => c.Id == id);
+                var categories = database.Categories.First(c => c.Id == id);
 
-                if (categoria == null) return NoContent();
+                if (categories == null) return NoContent();
 
-                if (categoria.Id > 0)
+                if (categories.Id > 0)
                 {
-                    database.Remove(categoria);
+                    database.Remove(categories);
                     database.SaveChanges();
                     return this.StatusCode(StatusCodes.Status200OK,
                     $"Categoria deletada com sucesso.");

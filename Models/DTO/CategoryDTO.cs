@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace mniaAPI.Models
 {
-    public class CategoryDTO
+    public class CategoriesDTO
     {
 
         public int Id { get; set; }

@@ -16,8 +16,8 @@ namespace mniaAPI.Data
 
         }
 
-        public DbSet<Starter> Starters { get; set; }
-        public DbSet<Category> Categorys { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Categories> Categories { get; set; }
 
     }
 }

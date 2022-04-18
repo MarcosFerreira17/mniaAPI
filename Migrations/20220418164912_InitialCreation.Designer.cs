@@ -9,7 +9,7 @@ using mniaAPI.Data;
 namespace mniaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220418124620_InitialCreation")]
+    [Migration("20220418164912_InitialCreation")]
     partial class InitialCreation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -19,7 +19,7 @@ namespace mniaAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
                 .HasAnnotation("ProductVersion", "5.0.16");
 
-            modelBuilder.Entity("mniaAPI.Models.Category", b =>
+            modelBuilder.Entity("mniaAPI.Models.Categories", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,28 +33,22 @@ namespace mniaAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categorys");
+                    b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("mniaAPI.Models.Starter", b =>
+            modelBuilder.Entity("mniaAPI.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<string>("CPF")
-                        .HasColumnType("longtext");
-
-                    b.Property<int?>("CategoryId")
+                    b.Property<int?>("CategoriesId")
                         .HasColumnType("int");
 
                     b.Property<string>("Email")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("FourLetters")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("FullName")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Password")
@@ -62,21 +56,21 @@ namespace mniaAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoriesId");
 
-                    b.ToTable("Starters");
+                    b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("mniaAPI.Models.Starter", b =>
+            modelBuilder.Entity("mniaAPI.Models.User", b =>
                 {
-                    b.HasOne("mniaAPI.Models.Category", null)
-                        .WithMany("Starters")
-                        .HasForeignKey("CategoryId");
+                    b.HasOne("mniaAPI.Models.Categories", null)
+                        .WithMany("Users")
+                        .HasForeignKey("CategoriesId");
                 });
 
-            modelBuilder.Entity("mniaAPI.Models.Category", b =>
+            modelBuilder.Entity("mniaAPI.Models.Categories", b =>
                 {
-                    b.Navigation("Starters");
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }
