@@ -25,55 +25,6 @@ namespace mniaAPI.Controllers
             this.database = database;
         }
 
-        public static bool validateCPF(string cpf)
-        {
-
-            int[] multiplicador1 = new int[9] { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
-            int[] multiplicador2 = new int[10] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
-            string tempCpf;
-            string digito;
-            int soma;
-            int resto;
-
-            cpf = cpf.Trim();
-            cpf = cpf.Replace(".", "").Replace("-", "");
-
-            if (cpf.Length != 11)
-                return false;
-
-            tempCpf = cpf.Substring(0, 9);
-            soma = 0;
-
-            for (int i = 0; i < 9; i++)
-                soma += int.Parse(tempCpf[i].ToString()) * multiplicador1[i];
-
-            resto = soma % 11;
-
-            if (resto < 2)
-                resto = 0;
-            else
-                resto = 11 - resto;
-
-            digito = resto.ToString();
-
-            tempCpf = tempCpf + digito;
-
-            soma = 0;
-
-            for (int i = 0; i < 10; i++)
-                soma += int.Parse(tempCpf[i].ToString()) * multiplicador2[i];
-
-            resto = soma % 11;
-
-            if (resto < 2)
-                resto = 0;
-            else
-                resto = 11 - resto;
-
-            digito = digito + resto.ToString();
-
-            return cpf.EndsWith(digito);
-        }
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -145,7 +96,8 @@ namespace mniaAPI.Controllers
                     }
                 }
 
-                bool checkCPF = validateCPF(model.CPF);
+                bool checkCPF = ValidateCPF.CPF(model.CPF);
+
                 if (checkCPF != true)
                 {
                     Response.StatusCode = 400;
@@ -164,6 +116,15 @@ namespace mniaAPI.Controllers
                     Response.StatusCode = 400;
                     return new ObjectResult("Verifique a sua categoria e tente novamente.");
                 }
+
+                var modelRole = model.Role.ToLower();
+
+                if (modelRole != "Admin" || modelRole != "Starter")
+                {
+                    Response.StatusCode = 400;
+                    return new ObjectResult("As roles permitidas são somente Starter e Admin.");
+                }
+
                 user.FullName = model.FullName;
                 user.Username = model.Username;
                 user.CPF = model.CPF;
@@ -171,7 +132,7 @@ namespace mniaAPI.Controllers
                 user.Email = model.Email;
                 user.Password = EncriptPasswordUser;
                 user.CategoriesId = model.CategoriesId;
-                user.Role = "Starter";
+                user.Role = modelRole;
 
                 database.Update(user);
                 database.SaveChanges();
@@ -206,7 +167,7 @@ namespace mniaAPI.Controllers
                     }
                 }
 
-                bool checkCPF = validateCPF(model.CPF);
+                bool checkCPF = ValidateCPF.CPF(model.CPF);
                 if (checkCPF != true)
                 {
                     Response.StatusCode = 400;
@@ -233,6 +194,7 @@ namespace mniaAPI.Controllers
                 user.Email = model.Email;
                 user.Password = EncriptPasswordUser;
                 user.CategoriesId = model.CategoriesId;
+                user.Role = "Starter";
 
                 database.Add(user);
                 database.SaveChanges();
@@ -244,58 +206,6 @@ namespace mniaAPI.Controllers
                    $"Erro ao tentar registrar um novo usuário. Erro: {ex.Message}");
             }
         }
-
-        // [HttpPost("Login")]
-        // public IActionResult Login([FromBody] UserLoginDTO credentials)
-        // {
-        //     // Busca um usuário por e-mail
-        //     // Verifica se a senha está correta
-        //     // Gerar um token jwt e retornar este token para o usuário
-        //     string EncriptPasswordUser = EncriptPassword(credentials.Password);
-
-        //     try
-        //     {
-        //         User user = database.Users.First(u => u.Username.Equals(credentials.Username));
-
-        //         if (user == null) { return NoContent(); }
-
-        //         if (user.Password.Equals(EncriptPasswordUser))
-        //         {
-        //             // Definindo uma chave de segurança.
-        //             string securityKey = "mnia_api_rest_projeto_starter";
-        //             //convertendo a chave de segurança em um array de bytes para conseguir gerar uma chame simé
-        //             var symmectricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
-        //             var credentialsForAccess = new SigningCredentials(symmectricKey, SecurityAlgorithms.HmacSha256Signature);
-
-        //             var claims = new List<Claim>();
-        //             claims.Add(new Claim("id", user.Id.ToString()));
-        //             claims.Add(new Claim("username", user.Username.ToString()));
-        //             claims.Add(new Claim(ClaimTypes.Role, user.Role));
-
-        //             var JWT = new JwtSecurityToken(
-        //                 issuer: "MNIAAPI", // Quem está fornecendo o jwt para o usuário.
-        //                 expires: DateTime.Now.AddMinutes(15), // Quando o token expira.
-        //                 audience: "usuario_comum", // Pra quem é destinado este token.
-        //                 signingCredentials: credentialsForAccess, // Credenciais de acesso.
-        //                 claims: claims
-        //             );
-
-        //             return Ok(new JwtSecurityTokenHandler().WriteToken(JWT));
-        //         }
-        //         else
-        //         {
-        //             Response.StatusCode = 401;
-        //             return new ObjectResult("");
-        //         }
-
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         return this.StatusCode(StatusCodes.Status500InternalServerError,
-        //             $"Erro ao tentar logar usuário. Erro: {ex.Message}");
-        //     }
-
-        // }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]

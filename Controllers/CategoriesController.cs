@@ -26,6 +26,13 @@ namespace mniaAPI.Controllers
             try
             {
                 var categories = database.Categories.Include(u => u.Users).ToList();
+                var users = database.Users.ToList();
+
+                foreach (var item in users)
+                {
+                    item.Password = "********";
+                }
+
                 if (categories == null) return NoContent();
 
                 return Ok(categories);
@@ -42,7 +49,7 @@ namespace mniaAPI.Controllers
         {
             try
             {
-                var categories = database.Categories.First(c => c.Id == id);
+                var categories = database.Categories.Include(u => u.Users).First(c => c.Id == id);
 
                 if (categories == null) return NoContent();
 
@@ -117,7 +124,7 @@ namespace mniaAPI.Controllers
         {
             try
             {
-                var categories = database.Categories.First(c => c.Id == id);
+                var categories = database.Categories.Include(u => u.Users).First(c => c.Id == id);
 
                 if (categories == null) return NoContent();
 
