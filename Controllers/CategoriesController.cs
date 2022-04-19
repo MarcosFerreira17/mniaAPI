@@ -5,6 +5,7 @@ using mniaAPI.Data;
 using mniaAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace mniaAPI.Controllers
 {
@@ -24,7 +25,7 @@ namespace mniaAPI.Controllers
         {
             try
             {
-                var categories = database.Categories.ToList();
+                var categories = database.Categories.Include(u => u.Users).ToList();
                 if (categories == null) return NoContent();
 
                 return Ok(categories);

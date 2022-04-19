@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using mniaAPI.Data;
 using mniaAPI.Models;
+using mniaAPI.Services;
 
 namespace mniaAPI.Controllers
 {
@@ -22,26 +23,6 @@ namespace mniaAPI.Controllers
         public UserController(ApplicationDbContext database)
         {
             this.database = database;
-        }
-
-        public static string EncriptPassword(string Password)
-        {
-            try
-            {
-                System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
-                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(Password);
-                byte[] hash = md5.ComputeHash(inputBytes);
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
-                for (int i = 0; i < hash.Length; i++)
-                {
-                    sb.Append(hash[i].ToString("X2"));
-                }
-                return sb.ToString(); // Retorna senha criptografada 
-            }
-            catch (Exception)
-            {
-                return null; // Caso encontre erro retorna nulo
-            }
         }
 
         public static bool validateCPF(string cpf)
@@ -148,7 +129,7 @@ namespace mniaAPI.Controllers
             {
                 var user = database.Users.First(c => c.Id == id);
                 var users = database.Users.ToList();
-                string EncriptPasswordUser = EncriptPassword(model.Password);
+                string EncriptPasswordUser = EncriptPassword.Encripted(model.Password);
 
                 //Valida se o email já existe no banco de dados.
 
@@ -190,6 +171,7 @@ namespace mniaAPI.Controllers
                 user.Email = model.Email;
                 user.Password = EncriptPasswordUser;
                 user.CategoriesId = model.CategoriesId;
+                user.Role = "Starter";
 
                 database.Update(user);
                 database.SaveChanges();
@@ -204,15 +186,15 @@ namespace mniaAPI.Controllers
             }
         }
 
-        [HttpPost("Register")]
-        public IActionResult Register([FromBody] UserDTO model)
+        [HttpPost]
+        public IActionResult Post([FromBody] UserDTO model)
         {
             try
             {
                 var userData = database.Users.ToList();
                 User user = new User();
 
-                string EncriptPasswordUser = EncriptPassword(model.Password);
+                string EncriptPasswordUser = EncriptPassword.Encripted(model.Password);
 
                 //Valida se o email já existe no banco de dados.
                 foreach (var item in userData)
@@ -263,63 +245,57 @@ namespace mniaAPI.Controllers
             }
         }
 
-        [HttpPost("Login")]
-        public IActionResult Login([FromBody] UserDTO credentials)
-        {
-            // Busca um usuário por e-mail
-            // Verifica se a senha está correta
-            // Gerar um token jwt e retornar este token para o usuário
-            string EncriptPasswordUser = EncriptPassword(credentials.Password);
+        // [HttpPost("Login")]
+        // public IActionResult Login([FromBody] UserLoginDTO credentials)
+        // {
+        //     // Busca um usuário por e-mail
+        //     // Verifica se a senha está correta
+        //     // Gerar um token jwt e retornar este token para o usuário
+        //     string EncriptPasswordUser = EncriptPassword(credentials.Password);
 
-            try
-            {
-                User user = database.Users.First(u => u.Email.Equals(credentials.Email));
+        //     try
+        //     {
+        //         User user = database.Users.First(u => u.Username.Equals(credentials.Username));
 
-                if (User != null)
-                {
+        //         if (user == null) { return NoContent(); }
 
-                    if (user.Password.Equals(EncriptPasswordUser))
-                    {
-                        // Definindo uma chave de segurança.
-                        string securityKey = "mnia_api_rest_projeto_starter";
-                        //convertendo a chave de segurança em um array de bytes para conseguir gerar uma chame simé
-                        var symmectricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
-                        var credentialsForAccess = new SigningCredentials(symmectricKey, SecurityAlgorithms.HmacSha256Signature);
+        //         if (user.Password.Equals(EncriptPasswordUser))
+        //         {
+        //             // Definindo uma chave de segurança.
+        //             string securityKey = "mnia_api_rest_projeto_starter";
+        //             //convertendo a chave de segurança em um array de bytes para conseguir gerar uma chame simé
+        //             var symmectricKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
+        //             var credentialsForAccess = new SigningCredentials(symmectricKey, SecurityAlgorithms.HmacSha256Signature);
 
-                        var claims = new List<Claim>();
-                        claims.Add(new Claim("id", user.Id.ToString()));
-                        claims.Add(new Claim("fullname", user.FullName.ToString()));
-                        claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+        //             var claims = new List<Claim>();
+        //             claims.Add(new Claim("id", user.Id.ToString()));
+        //             claims.Add(new Claim("username", user.Username.ToString()));
+        //             claims.Add(new Claim(ClaimTypes.Role, user.Role));
 
-                        var JWT = new JwtSecurityToken(
-                            issuer: "MNIAAPI", // Quem está fornecendo o jwt para o usuário.
-                            expires: DateTime.Now.AddMinutes(15), // Quando o token expira.
-                            audience: "usuario_comum", // Pra quem é destinado este token.
-                            signingCredentials: credentialsForAccess, // Credenciais de acesso.
-                            claims: claims
-                        );
+        //             var JWT = new JwtSecurityToken(
+        //                 issuer: "MNIAAPI", // Quem está fornecendo o jwt para o usuário.
+        //                 expires: DateTime.Now.AddMinutes(15), // Quando o token expira.
+        //                 audience: "usuario_comum", // Pra quem é destinado este token.
+        //                 signingCredentials: credentialsForAccess, // Credenciais de acesso.
+        //                 claims: claims
+        //             );
 
-                        return Ok(new JwtSecurityTokenHandler().WriteToken(JWT));
-                    }
-                    else
-                    {
-                        Response.StatusCode = 401;
-                        return new ObjectResult("");
-                    }
-                }
-                else
-                {
-                    Response.StatusCode = 401;
-                    return new ObjectResult("");
-                }
-            }
-            catch (Exception)
-            {
-                Response.StatusCode = 401;
-                return new ObjectResult("");
-            }
+        //             return Ok(new JwtSecurityTokenHandler().WriteToken(JWT));
+        //         }
+        //         else
+        //         {
+        //             Response.StatusCode = 401;
+        //             return new ObjectResult("");
+        //         }
 
-        }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return this.StatusCode(StatusCodes.Status500InternalServerError,
+        //             $"Erro ao tentar logar usuário. Erro: {ex.Message}");
+        //     }
+
+        // }
 
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace mniaAPI.Migrations
 {
-    public partial class InitialCreation : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -45,7 +45,9 @@ namespace mniaAPI.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Password = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CategoriesId = table.Column<int>(type: "int", nullable: false)
+                    CategoriesId = table.Column<int>(type: "int", nullable: false),
+                    Role = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -71,9 +73,9 @@ namespace mniaAPI.Migrations
             migrationBuilder.Sql("INSERT INTO Categories(Id, Technology, Name) VALUES('5','Dart', 'Turma 4')");
             migrationBuilder.Sql("INSERT INTO Categories(Id, Technology, Name) VALUES('6','Python', 'Turma 2')");
 
-            migrationBuilder.Sql("INSERT INTO Users(Id, Fullname, Username, CPF, FourLetters, Email, Password, CategoriesId) VALUES('1','Marcos Ferreira','Marcos Ferreira', '46680074800', 'MNIA', 'mnia@gft.com', '63A9F0EA7BB98050796B649E85481845', '1')");
-            migrationBuilder.Sql("INSERT INTO Users(Id, Fullname, Username, CPF, FourLetters, Email, Password, CategoriesId) VALUES('2','Admin','Admin', '46680074800','AMID','admin@gft.com', '11B784DBAADDF6853405FA2AA9A95D8E', '1')");
-            migrationBuilder.Sql("INSERT INTO Users(Id, Fullname, Username,CPF, FourLetters, Email, Password, CategoriesId) VALUES('3','Clécio','Clécio', '46680074800','CLIO','clecio@gft.com', '63A9F0EA7BB98050796B649E85481845', '1')");
+            migrationBuilder.Sql("INSERT INTO Users(Id, Fullname, Username, CPF, FourLetters, Email, Password, CategoriesId, Role) VALUES('1','Marcos Ferreira','Marcos Ferreira', '46680074800', 'MNIA', 'mnia@gft.com', '63A9F0EA7BB98050796B649E85481845', '1', 'Starter')");
+            migrationBuilder.Sql("INSERT INTO Users(Id, Fullname, Username, CPF, FourLetters, Email, Password, CategoriesId, Role) VALUES('2','Admin','Admin', '46680074800','AMID','admin@gft.com', '11B784DBAADDF6853405FA2AA9A95D8E', '1', 'Admin')");
+            migrationBuilder.Sql("INSERT INTO Users(Id, Fullname, Username, CPF, FourLetters, Email, Password, CategoriesId, Role) VALUES('3','Clécio','Clécio', '46680074800','CLIO','clecio@gft.com', '63A9F0EA7BB98050796B649E85481845', '1', 'Admin')");
 
         }
 

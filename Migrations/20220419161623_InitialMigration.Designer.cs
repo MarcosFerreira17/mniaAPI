@@ -8,8 +8,8 @@ using mniaAPI.Data;
 namespace mniaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220419131141_InitialCreation")]
-    partial class InitialCreation
+    [Migration("20220419161623_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -57,6 +57,9 @@ namespace mniaAPI.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Password")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Role")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Username")

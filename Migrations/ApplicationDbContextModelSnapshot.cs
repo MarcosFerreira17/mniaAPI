@@ -57,6 +57,9 @@ namespace mniaAPI.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Role")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Username")
                         .HasColumnType("longtext");
 
