@@ -94,7 +94,7 @@ namespace mniaAPI.Controllers
         }
 
         [HttpPost("Register")]
-        public IActionResult Register([FromBody] UserRegisterDTO model)
+        public IActionResult Register([FromBody] UserDTO model)
         {
             try
             {
@@ -114,8 +114,12 @@ namespace mniaAPI.Controllers
                 }
 
                 user.FullName = model.FullName;
+                user.Username = model.Username;
+                user.CPF = model.CPF;
+                user.FourLetters = model.FourLetters;
                 user.Email = model.Email;
                 user.Password = EncriptPasswordUser;
+                user.CategoriesId = model.CategoriesId;
 
                 database.Add(user);
                 database.SaveChanges();
@@ -130,7 +134,7 @@ namespace mniaAPI.Controllers
 
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] UserLoginDTO credentials)
+        public IActionResult Login([FromBody] UserDTO credentials)
         {
             // Busca um usuário por e-mail
             // Verifica se a senha está correta
@@ -154,7 +158,7 @@ namespace mniaAPI.Controllers
 
                         var claims = new List<Claim>();
                         claims.Add(new Claim("id", user.Id.ToString()));
-                        claims.Add(new Claim("email", user.Email.ToString()));
+                        claims.Add(new Claim("fullname", user.FullName.ToString()));
                         claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
                         var JWT = new JwtSecurityToken(
