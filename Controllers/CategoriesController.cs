@@ -92,12 +92,12 @@ namespace mniaAPI.Controllers
         {
             try
             {
-                var category = database.Categories.First(c => c.Id == id);
+                var categories = database.Categories.First(c => c.Id == id);
 
-                category.Name = model.Name;
-                category.Technology = model.Technology;
+                categories.Name = model.Name;
+                categories.Technology = model.Technology;
 
-                database.Update(category);
+                database.Update(categories);
                 database.SaveChanges();
 
                 return Ok(new { msg = "Categoria editada com sucesso." });
