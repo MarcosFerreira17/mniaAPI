@@ -6,6 +6,8 @@ using mniaAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using mniaAPI.HATEOAS;
+using System.Collections.Generic;
 
 namespace mniaAPI.Controllers
 {
@@ -15,9 +17,14 @@ namespace mniaAPI.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ApplicationDbContext database;
+        private HATEOAS.HATEOAS HATEOAS;
         public CategoriesController(ApplicationDbContext database)
         {
             this.database = database;
+            HATEOAS = new HATEOAS.HATEOAS("localhost:5001/api/v1/Categories");
+            HATEOAS.AddAction("GET_INFO", "GET");
+            HATEOAS.AddAction("EDIT_CATEGORIE", "PUT");
+            HATEOAS.AddAction("DELETE_CATEGORIE", "DELETE");
         }
 
         [HttpGet]
@@ -26,8 +33,20 @@ namespace mniaAPI.Controllers
             try
             {
                 var categories = database.Categories.Include(u => u.Users).ToList();
+
+                List<CategoriesContainer> categoriesHATEOAS = new List<CategoriesContainer>();
+
                 var users = database.Users.ToList();
 
+                foreach (var cat in categories)
+                {
+                    CategoriesContainer categorieHATEOAS = new CategoriesContainer();
+                    categorieHATEOAS.categories = cat;
+                    categorieHATEOAS.links = HATEOAS.GetActions(cat.Id.ToString());
+                    categoriesHATEOAS.Add(categorieHATEOAS);
+                }
+
+                //Esconde a senha do usuário.
                 foreach (var item in users)
                 {
                     item.Password = "********";
@@ -35,7 +54,7 @@ namespace mniaAPI.Controllers
 
                 if (categories == null) return NoContent();
 
-                return Ok(categories);
+                return Ok(categoriesHATEOAS);
             }
             catch (Exception ex)
             {
@@ -51,11 +70,16 @@ namespace mniaAPI.Controllers
             {
                 var categories = database.Categories.Include(u => u.Users).First(c => c.Id == id);
 
+                CategoriesContainer categoriesHATEOAS = new CategoriesContainer();
+
+                categoriesHATEOAS.categories = categories;
+                categoriesHATEOAS.links = HATEOAS.GetActions(categories.Id.ToString());
+
                 if (categories == null) return NoContent();
 
                 if (categories.Id > 0)
                 {
-                    return Ok(categories);
+                    return Ok(categoriesHATEOAS);
                 }
             }
             catch (Exception ex)
@@ -79,10 +103,15 @@ namespace mniaAPI.Controllers
                 categories.Name = model.Name;
                 categories.Technology = model.Technology;
 
+                CategoriesContainer categoriesHATEOAS = new CategoriesContainer();
+
+                categoriesHATEOAS.categories = categories;
+                categoriesHATEOAS.links = HATEOAS.GetActions(categories.Id.ToString());
+
                 database.Add(categories);
                 database.SaveChanges();
 
-                return Ok(new { msg = "Categoria criada com sucesso." });
+                return Ok(new { msg = "Categoria criada com sucesso.", categoriesHATEOAS });
 
 
             }
@@ -105,10 +134,15 @@ namespace mniaAPI.Controllers
                 categories.Name = model.Name;
                 categories.Technology = model.Technology;
 
+                CategoriesContainer categoriesHATEOAS = new CategoriesContainer();
+
+                categoriesHATEOAS.categories = categories;
+                categoriesHATEOAS.links = HATEOAS.GetActions(categories.Id.ToString());
+
                 database.Update(categories);
                 database.SaveChanges();
 
-                return Ok(new { msg = "Categoria editada com sucesso." });
+                return Ok(new { msg = "Categoria editada com sucesso.", categoriesHATEOAS });
 
             }
             catch (Exception ex)
@@ -128,12 +162,16 @@ namespace mniaAPI.Controllers
 
                 if (categories == null) return NoContent();
 
+                CategoriesContainer categoriesHATEOAS = new CategoriesContainer();
+
+                categoriesHATEOAS.categories = categories;
+                categoriesHATEOAS.links = HATEOAS.GetActions(categories.Id.ToString());
+
                 if (categories.Id > 0)
                 {
                     database.Remove(categories);
                     database.SaveChanges();
-                    return this.StatusCode(StatusCodes.Status200OK,
-                    $"Categoria deletada com sucesso.");
+                    return Ok(categoriesHATEOAS);
                 }
             }
             catch (Exception ex)
@@ -144,6 +182,12 @@ namespace mniaAPI.Controllers
 
             return this.StatusCode(StatusCodes.Status400BadRequest,
                     $"Erro ao tentar deletar categoria.");
+        }
+
+        public class CategoriesContainer
+        {
+            public Categories categories { get; set; }
+            public Link[] links { get; set; }
         }
 
     }

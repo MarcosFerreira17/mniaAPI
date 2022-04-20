@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using mniaAPI.Data;
+using mniaAPI.HATEOAS;
 using mniaAPI.Models;
 using mniaAPI.Services;
 
@@ -20,20 +21,35 @@ namespace mniaAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext database;
+        private HATEOAS.HATEOAS HATEOAS;
         public UserController(ApplicationDbContext database)
         {
             this.database = database;
+            HATEOAS = new HATEOAS.HATEOAS("localhost:5001/api/v1/User");
+            HATEOAS.AddAction("GET_INFO", "GET");
+            HATEOAS.AddAction("EDIT_CATEGORIE", "PUT");
+            HATEOAS.AddAction("DELETE_CATEGORIE", "DELETE");
         }
 
-
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public IActionResult Get()
         {
             try
             {
                 var users = database.Users.ToList();
 
+                List<UserContainer> usersHATEOAS = new List<UserContainer>();
+
+                foreach (var user in users)
+                {
+                    UserContainer userHATEOAS = new UserContainer();
+                    userHATEOAS.Users = user;
+                    userHATEOAS.links = HATEOAS.GetActions(user.Id.ToString());
+                    usersHATEOAS.Add(userHATEOAS);
+                }
+
+                //Esconde senha do user.
                 foreach (var item in users)
                 {
                     item.Password = "********";
@@ -41,7 +57,7 @@ namespace mniaAPI.Controllers
 
                 if (users == null) return NoContent();
 
-                return Ok(users);
+                return Ok(usersHATEOAS);
             }
             catch (Exception ex)
             {
@@ -51,18 +67,24 @@ namespace mniaAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public IActionResult Get(int id)
         {
             try
             {
                 var user = database.Users.First(u => u.Id == id);
 
+                //esconde a senha do user.
                 user.Password = "********";
+
+                UserContainer usersHATEOAS = new UserContainer();
+
+                usersHATEOAS.Users = user;
+                usersHATEOAS.links = HATEOAS.GetActions(user.Id.ToString());
 
                 if (user == null) return NoContent();
 
-                return Ok(user);
+                return Ok(usersHATEOAS);
             }
             catch (Exception ex)
             {
@@ -224,7 +246,7 @@ namespace mniaAPI.Controllers
                     $"Usuário deletado com sucesso.");
                 }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
                     $"Erro ao tentar deletar usuário. Erro: {ex.Message}");
@@ -232,6 +254,12 @@ namespace mniaAPI.Controllers
 
             return this.StatusCode(StatusCodes.Status400BadRequest,
                     $"Erro ao tentar deletar usuário.");
+        }
+
+        public class UserContainer
+        {
+            public User Users { get; set; }
+            public Link[] links { get; set; }
         }
 
     }

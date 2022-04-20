@@ -59,6 +59,8 @@ namespace mniaAPI.Controllers
                         claims: claims
                     );
 
+                    EmailWarning.sendEmail(user.Email);
+
                     return Ok(new JwtSecurityTokenHandler().WriteToken(JWT));
                 }
                 else
