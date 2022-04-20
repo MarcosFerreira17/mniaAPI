@@ -27,8 +27,8 @@ namespace mniaAPI.Controllers
             this.database = database;
             HATEOAS = new HATEOAS.HATEOAS("localhost:5001/api/v1/User");
             HATEOAS.AddAction("GET_INFO", "GET");
-            HATEOAS.AddAction("EDIT_CATEGORIE", "PUT");
-            HATEOAS.AddAction("DELETE_CATEGORIE", "DELETE");
+            HATEOAS.AddAction("EDIT_USER", "PUT");
+            HATEOAS.AddAction("DELETE_USER", "DELETE");
         }
 
         [HttpGet]
@@ -170,7 +170,7 @@ namespace mniaAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] UserDTO model)
+        public IActionResult Post([FromBody] UserRegisterDTO model)
         {
             try
             {
