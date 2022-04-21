@@ -13,7 +13,7 @@ namespace mniaAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    // [Authorize]
+    [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly ApplicationDbContext database;
@@ -154,7 +154,7 @@ namespace mniaAPI.Controllers
         }
 
         [HttpPatch("{id}")]
-        //[Authorize]
+        [Authorize]
         public IActionResult Patch(int id, [FromBody] CategoriesDTO model)
         {
             try
