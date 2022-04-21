@@ -1,4 +1,4 @@
-namespace mniaAPI.Services
+namespace mniaAPI.Helpers
 {
     public class ValidateCPF
     {

@@ -9,8 +9,8 @@ using mniaAPI.Data;
 namespace mniaAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220419163956_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20220421112549_InitialCreation")]
+    partial class InitialCreation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

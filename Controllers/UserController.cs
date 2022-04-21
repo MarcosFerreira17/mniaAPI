@@ -1,18 +1,15 @@
+using System.Runtime.Serialization;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using mniaAPI.Data;
 using mniaAPI.HATEOAS;
+using mniaAPI.Helpers;
 using mniaAPI.Models;
-using mniaAPI.Services;
 
 namespace mniaAPI.Controllers
 {
@@ -21,10 +18,12 @@ namespace mniaAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext database;
+        private readonly IWebHostEnvironment hostEnvironment;
         private HATEOAS.HATEOAS HATEOAS;
-        public UserController(ApplicationDbContext database)
+        public UserController(ApplicationDbContext database, IWebHostEnvironment hostEnvironment)
         {
             this.database = database;
+            this.hostEnvironment = hostEnvironment;
             HATEOAS = new HATEOAS.HATEOAS("localhost:5001/api/v1/User");
             HATEOAS.AddAction("GET_INFO", "GET");
             HATEOAS.AddAction("EDIT_USER", "PUT");
@@ -132,7 +131,7 @@ namespace mniaAPI.Controllers
                     Response.StatusCode = 400;
                     return new ObjectResult("Verifique a quantidade de digito de suas 4 letras e tente novamente.");
                 }
-
+                //Valida se a categoria é válida
                 if (model.CategoriesId <= 0)
                 {
                     Response.StatusCode = 400;
@@ -140,7 +139,7 @@ namespace mniaAPI.Controllers
                 }
 
                 var modelRole = model.Role.ToLower();
-
+                //Valida a role do user.
                 if (modelRole != "Admin" || modelRole != "Starter")
                 {
                     Response.StatusCode = 400;
@@ -175,6 +174,8 @@ namespace mniaAPI.Controllers
             try
             {
                 var userData = database.Users.ToList();
+                var CategoriesData = database.Categories.ToList();
+
                 User user = new User();
 
                 string EncriptPasswordUser = EncriptPassword.Encripted(model.Password);
@@ -188,6 +189,23 @@ namespace mniaAPI.Controllers
                         return new ObjectResult("Este e-mail já existe em nossa base de dados.");
                     }
                 }
+                //Verifica se a categoria passsada existe no banco de dados.
+                foreach (var item in CategoriesData)
+                {
+                    if (item.Id != model.CategoriesId)
+                    {
+                        Response.StatusCode = 401;
+                        return new ObjectResult("Esta categoria não existe em nossa base de dados.");
+                    }
+                }
+
+                var checkEmail = ValidateEmail.IsValidEmail(model.Email);
+
+                if (checkEmail != true)
+                {
+                    Response.StatusCode = 401;
+                    return new ObjectResult("Este e-mail não é válido, verifique e tente novamente.");
+                }
 
                 bool checkCPF = ValidateCPF.CPF(model.CPF);
                 if (checkCPF != true)
@@ -195,14 +213,7 @@ namespace mniaAPI.Controllers
                     Response.StatusCode = 400;
                     return new ObjectResult("Este CPF é inválido, verifique se digitou corretamente e faça uma nova tentativa.");
                 }
-
-                int checkFourLetters = model.FourLetters.Length;
-                if (checkFourLetters != 4)
-                {
-                    Response.StatusCode = 400;
-                    return new ObjectResult("Verifique a quantidade de digito de suas 4 letras e tente novamente.");
-                }
-
+                //Verifica se a categoria é valida
                 if (model.CategoriesId <= 0)
                 {
                     Response.StatusCode = 400;
@@ -212,7 +223,7 @@ namespace mniaAPI.Controllers
                 user.FullName = model.FullName;
                 user.Username = model.Username;
                 user.CPF = model.CPF;
-                user.FourLetters = model.FourLetters;
+                user.FourLetters = GenerateFourLetters.Generate(model.FullName);
                 user.Email = model.Email;
                 user.Password = EncriptPasswordUser;
                 user.CategoriesId = model.CategoriesId;

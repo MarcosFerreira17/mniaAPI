@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace mniaAPI.Models
 {
     public class User

@@ -1,6 +1,6 @@
 using System;
 
-namespace mniaAPI.Services
+namespace mniaAPI.Helpers
 {
     public class EncriptPassword
     {
