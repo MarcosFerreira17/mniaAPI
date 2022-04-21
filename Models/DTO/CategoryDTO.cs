@@ -8,7 +8,6 @@ namespace mniaAPI.Models
         public int Id { get; set; }
         [Required(ErrorMessage = "A Tencnologia é uma informação obrigatória, preencha e tente novamente.")]
         public string Technology { get; set; }
-        [Required(ErrorMessage = "O nome é uma informação obrigatória, preencha e tente novamente.")]
         public string Name { get; set; }
 
     }

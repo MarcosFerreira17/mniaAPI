@@ -9,9 +9,8 @@ namespace mniaAPI.Models
         public string FourLetters { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public int? CategoriesId { get; set; }
+        public int CategoriesId { get; set; }
         public string Role { get; set; }
-
 
     }
 }

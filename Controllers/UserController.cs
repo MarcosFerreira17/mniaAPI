@@ -168,6 +168,82 @@ namespace mniaAPI.Controllers
             }
         }
 
+        [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Patch(int id, [FromBody] UserDTO model)
+        {
+
+            try
+            {
+                var user = database.Users.First(c => c.Id == id);
+                var users = database.Users.ToList();
+                string EncriptPasswordUser = EncriptPassword.Encripted(model.Password);
+
+                //Valida se o email já existe no banco de dados.
+
+                if (user.Email != model.Email)
+                {
+                    foreach (var item in users)
+                    {
+                        if (user.Email == model.Email)
+                        {
+                            Response.StatusCode = 401;
+                            return new ObjectResult("Este e-mail já existe em nossa base de dados.");
+                        }
+                    }
+                }
+
+                bool checkCPF = ValidateCPF.CPF(model.CPF);
+
+                if (checkCPF != true)
+                {
+                    Response.StatusCode = 400;
+                    return new ObjectResult("Este CPF é inválido, verifique se digitou corretamente e faça uma nova tentativa.");
+                }
+
+                int checkFourLetters = model.FourLetters.Length;
+                if (checkFourLetters != 4)
+                {
+                    Response.StatusCode = 400;
+                    return new ObjectResult("Verifique a quantidade de digito de suas 4 letras e tente novamente.");
+                }
+                //Valida se a categoria é válida
+                if (model.CategoriesId <= 0)
+                {
+                    Response.StatusCode = 400;
+                    return new ObjectResult("Verifique a sua categoria e tente novamente.");
+                }
+
+                var modelRole = model.Role.ToLower();
+                //Valida a role do user.
+                if (modelRole != "Admin" || modelRole != "Starter")
+                {
+                    Response.StatusCode = 400;
+                    return new ObjectResult("As roles permitidas são somente Starter e Admin.");
+                }
+
+                user.FullName = model.FullName;
+                user.Username = model.Username;
+                user.CPF = model.CPF;
+                user.FourLetters = model.FourLetters;
+                user.Email = model.Email;
+                user.Password = EncriptPasswordUser;
+                user.CategoriesId = model.CategoriesId;
+                user.Role = modelRole;
+
+                database.Update(user);
+                database.SaveChanges();
+
+                return Ok(new { msg = "Usuario editado com sucesso." });
+
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Erro ao tentar editar um usuario. Erro: {ex.Message}");
+            }
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] UserRegisterDTO model)
         {
@@ -189,6 +265,7 @@ namespace mniaAPI.Controllers
                         return new ObjectResult("Este e-mail já existe em nossa base de dados.");
                     }
                 }
+
                 //Verifica se a categoria passsada existe no banco de dados.
                 foreach (var item in CategoriesData)
                 {
@@ -199,20 +276,22 @@ namespace mniaAPI.Controllers
                     }
                 }
 
+                //Verifica email
                 var checkEmail = ValidateEmail.IsValidEmail(model.Email);
-
                 if (checkEmail != true)
                 {
                     Response.StatusCode = 401;
                     return new ObjectResult("Este e-mail não é válido, verifique e tente novamente.");
                 }
 
+                //Verifica CPF
                 bool checkCPF = ValidateCPF.CPF(model.CPF);
                 if (checkCPF != true)
                 {
                     Response.StatusCode = 400;
                     return new ObjectResult("Este CPF é inválido, verifique se digitou corretamente e faça uma nova tentativa.");
                 }
+
                 //Verifica se a categoria é valida
                 if (model.CategoriesId <= 0)
                 {

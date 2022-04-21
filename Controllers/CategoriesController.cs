@@ -13,7 +13,7 @@ namespace mniaAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
-    [Authorize]
+    // [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly ApplicationDbContext database;
@@ -24,6 +24,7 @@ namespace mniaAPI.Controllers
             HATEOAS = new HATEOAS.HATEOAS("localhost:5001/api/v1/Categories");
             HATEOAS.AddAction("GET_INFO", "GET");
             HATEOAS.AddAction("EDIT_CATEGORIE", "PUT");
+            HATEOAS.AddAction("PARTIAL_EDIT_CATEGORIE", "PATCH");
             HATEOAS.AddAction("DELETE_CATEGORIE", "DELETE");
         }
 
@@ -130,6 +131,35 @@ namespace mniaAPI.Controllers
             try
             {
                 var categories = database.Categories.First(c => c.Id == id);
+
+                categories.Name = model.Name;
+                categories.Technology = model.Technology;
+
+                CategoriesContainer categoriesHATEOAS = new CategoriesContainer();
+
+                categoriesHATEOAS.categories = categories;
+                categoriesHATEOAS.links = HATEOAS.GetActions(categories.Id.ToString());
+
+                database.Update(categories);
+                database.SaveChanges();
+
+                return Ok(new { msg = "Categoria editada com sucesso.", categoriesHATEOAS });
+
+            }
+            catch (Exception ex)
+            {
+                return this.StatusCode(StatusCodes.Status500InternalServerError,
+                    $"Erro ao tentar editar uma categoria. Erro: {ex.Message}");
+            }
+        }
+
+        [HttpPatch("{id}")]
+        //[Authorize]
+        public IActionResult Patch(int id, [FromBody] CategoriesDTO model)
+        {
+            try
+            {
+                var categories = database.Categories.Include(u => u.Users).First(c => c.Id == id);
 
                 categories.Name = model.Name;
                 categories.Technology = model.Technology;
