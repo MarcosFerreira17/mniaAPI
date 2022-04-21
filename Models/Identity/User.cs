@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-
 namespace mniaAPI.Models
 {
     public class User
@@ -12,6 +10,7 @@ namespace mniaAPI.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public int? CategoriesId { get; set; }
+        public string FileName { get; set; }
         public string Role { get; set; }
 
     }

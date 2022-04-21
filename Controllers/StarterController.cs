@@ -1,13 +1,16 @@
+using System.Net;
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using mniaAPI.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace mniaAPI.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
+    [Authorize]
     public class StarterController : ControllerBase
     {
         private readonly ApplicationDbContext database;
@@ -25,6 +28,11 @@ namespace mniaAPI.Controllers
                 var users = database.Users.ToList();
 
                 if (users == null) return NoContent();
+
+                foreach (var item in users)
+                {
+                    item.Password = "*********";
+                }
 
                 var orderasc = users.OrderBy(n => n.FullName);
 
@@ -47,6 +55,11 @@ namespace mniaAPI.Controllers
 
                 if (users == null) return NoContent();
 
+                foreach (var item in users)
+                {
+                    item.Password = "*********";
+                }
+
                 var orderasc = users.OrderByDescending(n => n.FullName);
 
                 return Ok(orderasc);
@@ -67,7 +80,7 @@ namespace mniaAPI.Controllers
                 var user = database.Users.First(n => n.FullName == name);
 
                 //Esconde senha do user.
-                user.Password = null;
+                user.Password = "*********";
 
                 if (user == null) return NoContent();
 

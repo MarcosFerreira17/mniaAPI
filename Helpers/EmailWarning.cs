@@ -1,3 +1,4 @@
+using System;
 using System.Net;
 using System.Net.Mail;
 using System.Text;
@@ -6,30 +7,39 @@ namespace mniaAPI.Helpers
 {
     public static class EmailWarning
     {
-        public static void sendEmail(string email)
+        public static string sendEmail(string email, string mensagem)
         {
-            string emailDestinatario = email;
 
-            string tittle = "Login efetuado na Plataforma Starter.";
-            string mensagem = "Olá você acabou de acessar a Plataforma Starter, caso não tenha sido você troque sua senha o quanto antes.";
-            string senha = "ktJWP9!83iTvC6f";
+            try
+            {
+                string emailDestinatario = email;
 
-            MailMessage mailMessage = new MailMessage("mniaapi@gmail.com", emailDestinatario);
+                string tittle = "Login efetuado na Plataforma Starter.";
+                string senha = "ktJWP9!83iTvC6f";
 
-            mailMessage.Subject = $"{tittle}";
-            mailMessage.IsBodyHtml = true;
-            mailMessage.Body = $"<p> {mensagem} </p>";
-            mailMessage.SubjectEncoding = Encoding.GetEncoding("UTF-8");
-            mailMessage.BodyEncoding = Encoding.GetEncoding("UTF-8");
+                MailMessage mailMessage = new MailMessage("mniaapi@gmail.com", emailDestinatario);
 
-            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
+                mailMessage.Subject = $"{tittle}";
+                mailMessage.IsBodyHtml = true;
+                mailMessage.Body = $"<p> {mensagem} </p>";
+                mailMessage.SubjectEncoding = Encoding.GetEncoding("UTF-8");
+                mailMessage.BodyEncoding = Encoding.GetEncoding("UTF-8");
 
-            smtpClient.UseDefaultCredentials = false;
-            smtpClient.Credentials = new NetworkCredential("mniaapi@gmail.com", senha);
+                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com", 587);
 
-            smtpClient.EnableSsl = true;
+                smtpClient.UseDefaultCredentials = false;
+                smtpClient.Credentials = new NetworkCredential("mniaapi@gmail.com", senha);
 
-            smtpClient.Send(mailMessage);
+                smtpClient.EnableSsl = true;
+
+                smtpClient.Send(mailMessage);
+                return "E-mail enviado com sucesso";
+            }
+            catch (Exception)
+            {
+                return "Não foi possivel enviar um e-mail de verificação";
+            }
+
         }
     }
 }

@@ -78,6 +78,12 @@ namespace mniaAPI.Controllers
 
                 if (categories == null) return NoContent();
 
+                //Esconde a senha do usuário.
+                foreach (var item in categories.Users)
+                {
+                    item.Password = "********";
+                }
+
                 if (categories.Id > 0)
                 {
                     return Ok(categoriesHATEOAS);
@@ -86,7 +92,7 @@ namespace mniaAPI.Controllers
             catch (Exception ex)
             {
                 return this.StatusCode(StatusCodes.Status500InternalServerError,
-                    $"Erro ao tentar deletar categoria. Erro: {ex.Message}");
+                    $"Erro ao tentar encontrar categoria. Erro: {ex.Message}");
             }
 
             Response.StatusCode = 401;
@@ -135,6 +141,11 @@ namespace mniaAPI.Controllers
                 categories.Name = model.Name;
                 categories.Technology = model.Technology;
 
+                foreach (var item in categories.Users)
+                {
+                    item.Password = "********";
+                }
+
                 CategoriesContainer categoriesHATEOAS = new CategoriesContainer();
 
                 categoriesHATEOAS.categories = categories;
@@ -164,6 +175,11 @@ namespace mniaAPI.Controllers
                 categories.Name = model.Name;
                 categories.Technology = model.Technology;
 
+                foreach (var item in categories.Users)
+                {
+                    item.Password = "********";
+                }
+
                 CategoriesContainer categoriesHATEOAS = new CategoriesContainer();
 
                 categoriesHATEOAS.categories = categories;
@@ -191,6 +207,11 @@ namespace mniaAPI.Controllers
                 var categories = database.Categories.Include(u => u.Users).First(c => c.Id == id);
 
                 if (categories == null) return NoContent();
+
+                foreach (var item in categories.Users)
+                {
+                    item.Password = "********";
+                }
 
                 CategoriesContainer categoriesHATEOAS = new CategoriesContainer();
 

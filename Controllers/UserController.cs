@@ -10,6 +10,7 @@ using mniaAPI.Data;
 using mniaAPI.HATEOAS;
 using mniaAPI.Helpers;
 using mniaAPI.Models;
+using System.IO;
 
 namespace mniaAPI.Controllers
 {
@@ -18,12 +19,12 @@ namespace mniaAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext database;
-        private readonly IWebHostEnvironment hostEnvironment;
+        private readonly IWebHostEnvironment _env;
         private HATEOAS.HATEOAS HATEOAS;
-        public UserController(ApplicationDbContext database, IWebHostEnvironment hostEnvironment)
+        public UserController(ApplicationDbContext database, IWebHostEnvironment env)
         {
             this.database = database;
-            this.hostEnvironment = hostEnvironment;
+            _env = env;
             HATEOAS = new HATEOAS.HATEOAS("localhost:5001/api/v1/User");
             HATEOAS.AddAction("GET_INFO", "GET");
             HATEOAS.AddAction("EDIT_USER", "PUT");
@@ -125,12 +126,6 @@ namespace mniaAPI.Controllers
                     return new ObjectResult("Este CPF é inválido, verifique se digitou corretamente e faça uma nova tentativa.");
                 }
 
-                int checkFourLetters = model.FourLetters.Length;
-                if (checkFourLetters != 4)
-                {
-                    Response.StatusCode = 400;
-                    return new ObjectResult("Verifique a quantidade de digito de suas 4 letras e tente novamente.");
-                }
                 //Valida se a categoria é válida
                 if (model.CategoriesId <= 0)
                 {
@@ -140,7 +135,7 @@ namespace mniaAPI.Controllers
 
                 var modelRole = model.Role.ToLower();
                 //Valida a role do user.
-                if (modelRole != "Admin" || modelRole != "Starter")
+                if (modelRole != "admin" && modelRole != "starter")
                 {
                     Response.StatusCode = 400;
                     return new ObjectResult("As roles permitidas são somente Starter e Admin.");
@@ -149,7 +144,7 @@ namespace mniaAPI.Controllers
                 user.FullName = model.FullName;
                 user.Username = model.Username;
                 user.CPF = model.CPF;
-                user.FourLetters = model.FourLetters;
+                user.FourLetters = GenerateFourLetters.Generate(model.FullName);
                 user.Email = model.Email;
                 user.Password = EncriptPasswordUser;
                 user.CategoriesId = model.CategoriesId;
@@ -201,12 +196,6 @@ namespace mniaAPI.Controllers
                     return new ObjectResult("Este CPF é inválido, verifique se digitou corretamente e faça uma nova tentativa.");
                 }
 
-                int checkFourLetters = model.FourLetters.Length;
-                if (checkFourLetters != 4)
-                {
-                    Response.StatusCode = 400;
-                    return new ObjectResult("Verifique a quantidade de digito de suas 4 letras e tente novamente.");
-                }
                 //Valida se a categoria é válida
                 if (model.CategoriesId <= 0)
                 {
@@ -216,7 +205,7 @@ namespace mniaAPI.Controllers
 
                 var modelRole = model.Role.ToLower();
                 //Valida a role do user.
-                if (modelRole != "Admin" || modelRole != "Starter")
+                if (modelRole != "admin" && modelRole != "starter")
                 {
                     Response.StatusCode = 400;
                     return new ObjectResult("As roles permitidas são somente Starter e Admin.");
@@ -225,7 +214,7 @@ namespace mniaAPI.Controllers
                 user.FullName = model.FullName;
                 user.Username = model.Username;
                 user.CPF = model.CPF;
-                user.FourLetters = model.FourLetters;
+                user.FourLetters = GenerateFourLetters.Generate(model.FullName);
                 user.Email = model.Email;
                 user.Password = EncriptPasswordUser;
                 user.CategoriesId = model.CategoriesId;
@@ -245,7 +234,7 @@ namespace mniaAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] UserRegisterDTO model)
+        public IActionResult Post([FromForm] UserRegisterDTO model)
         {
             try
             {
@@ -263,16 +252,6 @@ namespace mniaAPI.Controllers
                     {
                         Response.StatusCode = 401;
                         return new ObjectResult("Este e-mail já existe em nossa base de dados.");
-                    }
-                }
-
-                //Verifica se a categoria passsada existe no banco de dados.
-                foreach (var item in CategoriesData)
-                {
-                    if (item.Id != model.CategoriesId)
-                    {
-                        Response.StatusCode = 401;
-                        return new ObjectResult("Esta categoria não existe em nossa base de dados.");
                     }
                 }
 
@@ -299,6 +278,35 @@ namespace mniaAPI.Controllers
                     return new ObjectResult("Verifique a sua categoria e tente novamente.");
                 }
 
+                if (model.Files.Length > 0)
+                {
+                    try
+                    {
+                        if (!Directory.Exists(_env.WebRootPath + "\\Images\\"))
+                        {
+                            Directory.CreateDirectory(_env.WebRootPath + "\\Images\\");
+                        }
+
+                        using (FileStream fileStream = System.IO.File.Create(_env.WebRootPath + "\\Images\\" + model.Files.FileName))
+                        {
+                            model.Files.CopyTo(fileStream);
+                            fileStream.Flush();
+                        }
+
+                        var checkImage = ValidateImage.imageFile(model.Files);
+                        if (checkImage == false)
+                        {
+                            return this.StatusCode(StatusCodes.Status500InternalServerError,
+                                $"Erro ao tentar adicionar imagem, verifique o formato da imagem e tente novamente.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return this.StatusCode(StatusCodes.Status500InternalServerError,
+                            $"Erro ao tentar deletar usuário. Erro: {ex.Message}");
+                    }
+                }
+
                 user.FullName = model.FullName;
                 user.Username = model.Username;
                 user.CPF = model.CPF;
@@ -306,10 +314,13 @@ namespace mniaAPI.Controllers
                 user.Email = model.Email;
                 user.Password = EncriptPasswordUser;
                 user.CategoriesId = model.CategoriesId;
+                user.FileName = model.Files.FileName;
                 user.Role = "Starter";
 
                 database.Add(user);
                 database.SaveChanges();
+
+                EmailWarning.sendEmail(model.Email, "Olá você acabou de criar sua conta na Plataforma Starter.");
                 return Ok(new { msg = "Usuário cadastrado com sucesso." });
             }
             catch (Exception ex)

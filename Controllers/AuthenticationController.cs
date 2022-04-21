@@ -47,7 +47,7 @@ namespace mniaAPI.Controllers
                     var credentialsForAccess = new SigningCredentials(symmectricKey, SecurityAlgorithms.HmacSha256Signature);
 
                     var claims = new List<Claim>();
-                    claims.Add(new Claim("id", user.Id.ToString()));
+                    claims.Add(new Claim("Email", user.Email.ToString()));
                     claims.Add(new Claim("username", user.Username.ToString()));
                     claims.Add(new Claim(ClaimTypes.Role, user.Role));
 
@@ -59,7 +59,7 @@ namespace mniaAPI.Controllers
                         claims: claims
                     );
 
-                    EmailWarning.sendEmail(user.Email);
+                    EmailWarning.sendEmail(user.Email, "Olá você acabou de acessar a Plataforma Starter.");
 
                     return Ok(new JwtSecurityTokenHandler().WriteToken(JWT));
                 }
