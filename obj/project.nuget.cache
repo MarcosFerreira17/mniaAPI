@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "XUMzlbKH/sopRhce8v5rRmJ95kWFpWwYfi4UTuzOI4WPOVGebwP9Dmd9WwH2ZJiW291tkFjg1CzambYq7e+/cQ==",
+  "dgSpecHash": "FdQ6ci6NKbJjiLuDOM8apIDHJAw6CibYoS1pRal6hR+FxdtD/Qg9PwBJyzeS3FPXQEGXO1LnEEPdfat0HV+PHA==",
   "success": true,
-  "projectFilePath": "C:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj",
+  "projectFilePath": "c:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mnia\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\mnia\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\5.0.16\\microsoft.aspnetcore.authentication.jwtbearer.5.0.16.nupkg.sha512",

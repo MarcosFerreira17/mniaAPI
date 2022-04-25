@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj": {}
+    "c:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj": {}
   },
   "projects": {
-    "C:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj": {
+    "c:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj",
+        "projectUniqueName": "c:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj",
         "projectName": "mniaAPI",
-        "projectPath": "C:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj",
+        "projectPath": "c:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\mniaAPI.csproj",
         "packagesPath": "C:\\Users\\mnia\\.nuget\\packages\\",
-        "outputPath": "C:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\obj\\",
+        "outputPath": "c:\\dev\\Projeto_Starter\\Desafio_API\\Atividades\\mniaAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mnia\\AppData\\Roaming\\NuGet\\NuGet.Config"
