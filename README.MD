@@ -1,10 +1,4 @@
-# MNIAAPI
-
 ## _API RESTFUL - user registration_
-
-[![N|Solid](https://cldup.com/dTxpPi9lDf.thumb.png)](https://nodesource.com/products/nsolid)
-
-[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
 
 This is a RESTFUL API, containing the basic HTTP methods (GET, POST, PUT, DELETE) for a course/student system, after registering the student cannot change their data.
 
@@ -21,7 +15,7 @@ This is a RESTFUL API, containing the basic HTTP methods (GET, POST, PUT, DELETE
 
 ## Development
 
-Ao clonar o repositório siga os passos abaixo: \***\* Você deve ter a versâo .net 5 instalada para testar a aplicação \*\***
+When cloning you must follow the steps below: \***\* You must have the .net 5 version installed to test the application \*\***
 
 First Tab:
 
